@@ -10,20 +10,20 @@ var enemyDirection = 1;
 var enemiesHit = 0;
 
 // Constants
-var SCREEN_X = 480;
-var SCREEN_Y = 600;
+var SCREEN_X = 640;
+var SCREEN_Y = 640;
 
 var PLAYER_SIZE = 32;
 var PLAYER_HALFSIZE = PLAYER_SIZE / 2;
-var PLAYER_COOLDOWN = 2;
+var PLAYER_COOLDOWN = 1;
 
 var BULLET_SIZE = 4;
 var BULLET_HALFSIZE = BULLET_SIZE / 2;
-var BULLET_SPEED = 4;
+var BULLET_SPEED = 8;
 
 
-var ENEMY_ROWS = 2;
-var ENEMY_COLUMNS = 5;
+var ENEMY_ROWS = 4;
+var ENEMY_COLUMNS = 8;
 var ENEMY_SPACING = 64;
 var ENEMY_SPEED = 2;
 var ENEMY_SIZE = 32;
@@ -57,8 +57,8 @@ function initPlayer() {
 
 function initEnemies() {
 	var i, x;
-	for (i = 0; i <= ENEMY_ROWS; i++) {
-		for (x = 0; x <= ENEMY_COLUMNS; x++) {
+	for (i = 0; i < ENEMY_ROWS; i++) {
+		for (x = 0; x < ENEMY_COLUMNS; x++) {
 			var enemy = new createjs.Shape();
 			enemy.graphics.beginFill("blue").drawCircle(0, 0, 16);
 			enemy.x = ENEMY_SPACING * (x + 1);
@@ -108,18 +108,18 @@ function updateCooldown(delta) {
 
 function handleCollisions(delta) {
 	playerCheckScreenBoundaries();
-	enemyCheckScreenBoundaries();
 	enemyCollisions();
+	enemyCheckScreenBoundaries();
 }
 
 function enemyCollisions() {
-	for (var i = 0; i < enemies.length; i++) {
+	for (var i = enemies.length - 1; i >= 0; i--) {
 		var a_left = enemies[i].x - ENEMY_HALFSIZE;
 		var a_right = enemies[i].x + ENEMY_HALFSIZE;
 		var a_top = enemies[i].y + ENEMY_HALFSIZE;
 		var a_bottom = enemies[i].y - ENEMY_HALFSIZE;
 
-		for (var j = 0; j < playerBullets.length; j++) {
+		for (var j = playerBullets.length - 1; j >= 0; j--) {
 			var b_left = playerBullets[j].x - BULLET_HALFSIZE;
 			var b_right = playerBullets[j].x + BULLET_HALFSIZE;
 			var b_top = playerBullets[j].y + BULLET_HALFSIZE;
@@ -127,13 +127,13 @@ function enemyCollisions() {
 
 			if (rectangleIntersection(a_left, a_right, a_top, a_bottom,
 				b_left, b_right, b_top, b_bottom) == true) {
-					stage.removeChild(enemies[i]);
-					stage.removeChild(playerBullets[j]);
-					enemies.splice(i, 1);
-					playerBullets.splice(j, 1);
-					i--;
-					j--;
-				}
+				stage.removeChild(enemies[i]);
+				stage.removeChild(playerBullets[j]);
+				enemies.splice(i, 1);
+				playerBullets.splice(j, 1);
+
+				checkEndGame();
+			}
 		}
 	}
 }
@@ -162,7 +162,14 @@ function enemyCheckScreenBoundaries() {
 	for (var i = 0; i < enemies.length; i++) {
 		if (enemies[i].x > SCREEN_X - ENEMY_SIZE || enemies[i].x < ENEMY_SIZE) {
 			enemyDirection *= -1;
+			break;
 		}
+	}
+}
+
+function checkEndGame() {
+	if (enemies.length == 0) {
+		alert("Congratulations!");
 	}
 }
 
