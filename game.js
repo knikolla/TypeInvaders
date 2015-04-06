@@ -2,15 +2,25 @@
 var stage;
 var player;
 var enemies = [];
+var playerBullets = [];
+var playerCooldownTimer = 0;
 var keys = {};
 var enemySpeedMultiplier = 2;
 var enemyDirection = 1;
+var enemiesHit = 0;
 
 // Constants
 var SCREEN_X = 480;
 var SCREEN_Y = 600;
+
 var PLAYER_SIZE = 32;
 var PLAYER_HALFSIZE = PLAYER_SIZE / 2;
+var PLAYER_COOLDOWN = 2;
+
+var BULLET_SIZE = 4;
+var BULLET_HALFSIZE = BULLET_SIZE / 2;
+var BULLET_SPEED = 4;
+
 
 var ENEMY_ROWS = 2;
 var ENEMY_COLUMNS = 5;
@@ -64,6 +74,8 @@ function tick(updateEvent) {
 	var delta = updateEvent.delta / 1000;
 
 	handleInput(delta);
+	updateCooldown(delta);
+	playerBulletUpdate(delta);
 	enemyUpdate(delta);
 	handleCollisions(delta);
 
@@ -73,16 +85,68 @@ function tick(updateEvent) {
 function handleInput(delta) {
 	if (keys[KEY_LEFT]) 	player.x -= 10;
 	if (keys[KEY_RIGHT]) 	player.x += 10;
+	if (keys[KEY_UP]) playerFire(player.x, player.y);
+}
+
+function playerFire(x, y) {
+	if (playerCooldownTimer <= 0) {
+		var bullet = new createjs.Shape();
+		bullet.graphics.beginFill("red").drawCircle(0, 0, BULLET_SIZE);
+		bullet.x = x;
+		bullet.y = y - (PLAYER_HALFSIZE + BULLET_SIZE / 2);
+		stage.addChild(bullet);
+		playerBullets.push(bullet);
+		playerCooldownTimer = PLAYER_COOLDOWN;
+	}
+}
+
+function updateCooldown(delta) {
+	if (playerCooldownTimer > 0) {
+		playerCooldownTimer -= delta;
+	}
 }
 
 function handleCollisions(delta) {
 	playerCheckScreenBoundaries();
 	enemyCheckScreenBoundaries();
+	enemyCollisions();
+}
+
+function enemyCollisions() {
+	for (var i = 0; i < enemies.length; i++) {
+		var a_left = enemies[i].x - ENEMY_HALFSIZE;
+		var a_right = enemies[i].x + ENEMY_HALFSIZE;
+		var a_top = enemies[i].y + ENEMY_HALFSIZE;
+		var a_bottom = enemies[i].y - ENEMY_HALFSIZE;
+
+		for (var j = 0; j < playerBullets.length; j++) {
+			var b_left = playerBullets[j].x - BULLET_HALFSIZE;
+			var b_right = playerBullets[j].x + BULLET_HALFSIZE;
+			var b_top = playerBullets[j].y + BULLET_HALFSIZE;
+			var b_bottom = playerBullets[j].y - BULLET_HALFSIZE;
+
+			if (rectangleIntersection(a_left, a_right, a_top, a_bottom,
+				b_left, b_right, b_top, b_bottom) == true) {
+					stage.removeChild(enemies[i]);
+					stage.removeChild(playerBullets[j]);
+					enemies.splice(i, 1);
+					playerBullets.splice(j, 1);
+					i--;
+					j--;
+				}
+		}
+	}
 }
 
 function enemyUpdate(delta) {
 	for (var i = 0; i < enemies.length; i++) {
 		enemies[i].x += ENEMY_SPEED * enemyDirection * enemySpeedMultiplier;
+	}
+}
+
+function playerBulletUpdate(delta) {
+	for (var i = 0; i < playerBullets.length; i++) {
+		playerBullets[i].y -= BULLET_SPEED;
 	}
 }
 
@@ -100,6 +164,15 @@ function enemyCheckScreenBoundaries() {
 			enemyDirection *= -1;
 		}
 	}
+}
+
+function rectangleIntersection(a_left, a_right, a_top, a_bottom,
+	b_left, b_right, b_top, b_bottom) {
+	if (a_right < b_left) return false; // a is left of b
+	if (a_left > b_right) return false; // a is right of b
+	if (a_top < b_bottom) return false; // a is above b
+	if (a_bottom > b_top) return false; // a is below b
+	return true; // boxes overlap
 }
 
 function keyDown(event) {
