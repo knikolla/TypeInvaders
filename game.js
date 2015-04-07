@@ -84,7 +84,7 @@ function initResources() {
 	spritesSpaceship = new createjs.SpriteSheet({
 		images: [imageSpaceship],
 		frames: { 
-			width: 32, height: 32, regX: 0, regY: 0
+			width: 32, height: 32, regX: 16, regY: 16
 		},
 		animations: {
 			walk: [0, 2, "idle"]
