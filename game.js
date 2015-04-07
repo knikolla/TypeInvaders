@@ -9,6 +9,10 @@ var enemySpeedMultiplier = 2;
 var enemyDirection = 1;
 var enemiesHit = 0;
 
+// Resources
+var imageSpaceship = new Image();
+var spritesSpaceship;
+
 // Constants
 var SCREEN_X = 640;
 var SCREEN_Y = 640;
@@ -36,6 +40,7 @@ var KEY_DOWN = 40;
 
 function init() {
 	initStage();
+	initResources();
 	initPlayer();
 	initEnemies();
 }
@@ -48,10 +53,14 @@ function initStage() {
 }
 
 function initPlayer() {
-	player = new createjs.Shape();
-	player.graphics.beginFill("green").drawCircle(0, 0, PLAYER_HALFSIZE);
+	//player = new createjs.Shape();
+	//player.graphics.beginFill("green").drawCircle(0, 0, PLAYER_HALFSIZE);
+	
+	player = new createjs.BitmapAnimation(spritesSpaceship);
+	player.gotoAndPlay("idle");
 	player.x = SCREEN_X / 2 - PLAYER_SIZE;
 	player.y = SCREEN_Y - PLAYER_SIZE - 32;
+	player.currentFrame = 0;
 	stage.addChild(player);
 }
 
@@ -67,6 +76,20 @@ function initEnemies() {
 			enemies.push(enemy);
 		}
 	}
+}
+
+function initResources() {
+	imageSpaceship.src = "images/spaceship.png";
+
+	spritesSpaceship = new createjs.SpriteSheet({
+		images: [imageSpaceship],
+		frames: { 
+			width: 32, height: 32, regX: 0, regY: 0
+		},
+		animations: {
+			walk: [0, 2, "idle"]
+		}
+	});
 }
 
 function tick(updateEvent) {
