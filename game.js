@@ -13,6 +13,9 @@ var enemiesHit = 0;
 var imageSpaceship = new Image();
 var spritesSpaceship;
 
+var imageAlien = new Image();
+var spritesAlien;
+
 // Constants
 var SCREEN_X = 640;
 var SCREEN_Y = 640;
@@ -68,8 +71,10 @@ function initEnemies() {
 	var i, x;
 	for (i = 0; i < ENEMY_ROWS; i++) {
 		for (x = 0; x < ENEMY_COLUMNS; x++) {
-			var enemy = new createjs.Shape();
-			enemy.graphics.beginFill("blue").drawCircle(0, 0, 16);
+			//var enemy = new createjs.Shape();
+			//enemy.graphics.beginFill("blue").drawCircle(0, 0, 16);
+			var enemy = new createjs.BitmapAnimation(spritesAlien);
+			enemy.gotoAndPlay("idle");
 			enemy.x = ENEMY_SPACING * (x + 1);
 			enemy.y = ENEMY_SPACING * (i + 1);
 			stage.addChild(enemy);
@@ -80,6 +85,7 @@ function initEnemies() {
 
 function initResources() {
 	imageSpaceship.src = "images/spaceship.png";
+	imageAlien.src = "images/alien1.png";
 
 	spritesSpaceship = new createjs.SpriteSheet({
 		images: [imageSpaceship],
@@ -88,6 +94,16 @@ function initResources() {
 		},
 		animations: {
 			walk: [0, 2, "idle"]
+		}
+	});
+
+	spritesAlien = new createjs.SpriteSheet({
+		images: [imageAlien],
+		frames: { 
+			width: 32, height: 32, regX: 16, regY: 16
+		},
+		animations: {
+			walk: [0, 3, "idle"]
 		}
 	});
 }
