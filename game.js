@@ -3,11 +3,13 @@ var stage;
 var player;
 var enemies = [];
 var playerBullets = [];
+var enemyBullets = [];
 var playerCooldownTimer = 0;
 var keys = {};
 var enemySpeedMultiplier = 2;
 var enemyDirection = 1;
 var enemiesHit = 0;
+var enemyCooldownTimer = 3;
 
 // Resources
 var imageSpaceship = new Image();
@@ -22,12 +24,12 @@ var SCREEN_Y = 640;
 
 var PLAYER_SIZE = 32;
 var PLAYER_HALFSIZE = PLAYER_SIZE / 2;
+var PLAYER_SPEED = 20;
 var PLAYER_COOLDOWN = 1;
 
 var BULLET_SIZE = 4;
 var BULLET_HALFSIZE = BULLET_SIZE / 2;
-var BULLET_SPEED = 8;
-
+var BULLET_SPEED = 16;
 
 var ENEMY_ROWS = 4;
 var ENEMY_COLUMNS = 8;
@@ -35,6 +37,7 @@ var ENEMY_SPACING = 64;
 var ENEMY_SPEED = 2;
 var ENEMY_SIZE = 32;
 var ENEMY_HALFSIZE = ENEMY_SIZE / 2;
+var ENEMY_MAX_COOLDOWN = 0.3;
 
 var KEY_LEFT = 37;
 var KEY_RIGHT = 39;
@@ -115,6 +118,7 @@ function tick(updateEvent) {
 	handleInput(delta);
 	updateCooldown(delta);
 	playerBulletUpdate(delta);
+	enemyBulletUpdate(delta);
 	enemyUpdate(delta);
 	handleCollisions(delta);
 
@@ -122,8 +126,8 @@ function tick(updateEvent) {
 }
 
 function handleInput(delta) {
-	if (keys[KEY_LEFT]) 	player.x -= 10;
-	if (keys[KEY_RIGHT]) 	player.x += 10;
+	if (keys[KEY_LEFT]) 	player.x -= PLAYER_SPEED;
+	if (keys[KEY_RIGHT]) 	player.x += PLAYER_SPEED;
 	if (keys[KEY_UP]) playerFire(player.x, player.y);
 }
 
@@ -146,6 +150,7 @@ function updateCooldown(delta) {
 }
 
 function handleCollisions(delta) {
+	playerCollisions();
 	playerCheckScreenBoundaries();
 	enemyCollisions();
 	enemyCheckScreenBoundaries();
@@ -177,6 +182,27 @@ function enemyCollisions() {
 	}
 }
 
+function playerCollisions() {
+	var a_left = player.x - PLAYER_HALFSIZE;
+	var a_right = player.x + PLAYER_HALFSIZE;
+	var a_top = player.y + PLAYER_HALFSIZE;
+	var a_bottom = player.y - PLAYER_HALFSIZE;
+
+	for (var i = enemyBullets.length - 1; i >= 0; i--) {
+		var b_left = enemyBullets[i].x - BULLET_HALFSIZE;
+		var b_right = enemyBullets[i].x + BULLET_HALFSIZE;
+		var b_top = enemyBullets[i].y + BULLET_HALFSIZE;
+		var b_bottom = enemyBullets[i].y - BULLET_HALFSIZE;
+
+		if (rectangleIntersection(a_left, a_right, a_top, a_bottom,
+			b_left, b_right, b_top, b_bottom) == true) {
+			stage.removeChild(player);
+			stage.removeChild(enemyBullets[i]);
+			enemyBullets.splice(j, 1);
+		}
+	}
+}
+
 function enemyUpdate(delta) {
 	for (var i = 0; i < enemies.length; i++) {
 		enemies[i].x += ENEMY_SPEED * enemyDirection * enemySpeedMultiplier;
@@ -186,6 +212,24 @@ function enemyUpdate(delta) {
 function playerBulletUpdate(delta) {
 	for (var i = 0; i < playerBullets.length; i++) {
 		playerBullets[i].y -= BULLET_SPEED;
+	}
+}
+
+function enemyBulletUpdate(delta) {
+	for (var i = 0; i < enemyBullets.length; i++) {
+		enemyBullets[i].y += BULLET_SPEED;
+	}
+
+	enemyCooldownTimer -= delta;
+	if (enemyCooldownTimer < 0) {
+		var r = Math.round((enemies.length - 1) * Math.random());
+		var bullet = new createjs.Shape();
+		bullet.graphics.beginFill("blue").drawCircle(0, 0, BULLET_SIZE);
+		bullet.x = enemies[r].x;
+		bullet.y = enemies[r].y + (ENEMY_HALFSIZE + BULLET_SIZE / 2);
+		stage.addChild(bullet);
+		enemyBullets.push(bullet);
+		enemyCooldownTimer = enemies.length * ENEMY_MAX_COOLDOWN * Math.random();
 	}
 }
 
