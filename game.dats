@@ -90,7 +90,9 @@ local
     in
       if e_cooldown[] < 0 then
         let
-          val () = e_cooldown[] := 1000
+          val e = enemies_get()
+          val n = e.size()
+          val () = e_cooldown[] := my_rand(ENEMY_MAX_COOLDOWN) * (n/4 + 1)
         in
           Some(1)
         end
@@ -125,6 +127,7 @@ implement player_death(p) =
   let
     val () = player_remove()
     val () = stage_remove(p)
+    val () = gameover_alert()
   in
     ()
   end
@@ -141,11 +144,6 @@ implement game_tick(dt) =
         val () = player_update(p, dt)
         val () = player_bullets_update(dt)
         val () = enemy_bullets_update(dt)
-
-        val i = 0
-        val () = if
-          i = 1 then player_death(p)
-          else ()
       in
         stage_update()
       end
@@ -248,6 +246,12 @@ implement player_update(p, dt) =
 {
   val () = player_cooldown(dt)
   val () = player_input(p)
+
+  val b = enemy_bullets_get()
+  val n = b.size()
+  val i = object_store_collision(p, PLAYER_HALFSIZE, b, BULLET_HALFSIZE, n)
+
+  val () = if i > 0 then player_death(p)
 }
 
 implement player_bullets_update(dt) =
@@ -268,6 +272,7 @@ implement player_bullets_update(dt) =
           {
             val () = s.remove(i)
             val () = stage_remove(e)
+            val () = if en = 1 then congrats_alert()
           }
       in
         if i > 0 then move(s, n, i - 1)

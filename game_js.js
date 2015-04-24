@@ -19,22 +19,9 @@ var ENEMY_SIZE = 32;
 var ENEMY_HALFSIZE = ENEMY_SIZE / 2;
 var ENEMY_MAX_COOLDOWN = 300;
 
-var KEY_LEFT = 37;
-var KEY_RIGHT = 39;
-var KEY_UP = 38;
-var KEY_DOWN = 40;
-
 // Global Variables
 var stage;
-var enemies = [];
-var playerBullets = [];
-var enemyBullets = [];
-var playerCooldownTimer = 0;
 var keys = {};
-var enemySpeedMultiplier = 2;
-var enemyDirection = 1;
-var enemiesHit = 0;
-var enemyCooldownTimer = 3;
 
 // Resources
 var imageSpaceship = new Image();
@@ -159,7 +146,6 @@ function player_create_bullet(p) {
     bullet.graphics.beginFill("red").drawCircle(0, 0, BULLET_SIZE);
     bullet.x = x;
     bullet.y = y - (PLAYER_HALFSIZE + BULLET_SIZE / 2);
-    playerBullets.push(bullet);
 
     return bullet;
 }
@@ -189,8 +175,11 @@ function keyUp(event) {
     delete keys[event.keyCode];
 }
 
-function checkEndGame() {
-    if (enemies.length == 0) {
-        alert("Congratulations!");
-    }
+function gameover_alert() {
+    alert("Game Over!");
 }
+
+function congrats_alert() {
+    alert("Congratulations!");
+}
+

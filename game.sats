@@ -19,21 +19,19 @@
 //
 (* ****** ****** *)
 
-// ATS ONLY Defines
 #define PLAYER_X 304
 #define PLAYER_Y 576
 
-// Global Defines
 #define SCREEN_X 640
 #define SCREEN_Y 640
 
 #define ENEMY_ROWS 4
 #define ENEMY_COLUMNS 8
 #define ENEMY_SPACING 64
-#define ENEMY_SPEED 2
+#define ENEMY_SPEED 4
 #define ENEMY_SIZE 32
 #define ENEMY_HALFSIZE 16
-#define ENEMY_MAX_COOLDOWN 300
+#define ENEMY_MAX_COOLDOWN 500
 
 #define PLAYER_SIZE 32
 #define PLAYER_HALFSIZE 16
@@ -90,8 +88,7 @@ overload .size with store_size
 // Others
 fun object_store_collision{n:nat}(g: gameobject, gs: int, s: store, ss: int, n: int(n)): int ="mac#"
 fun check_collision(gameobject, hsize_a: int, gameobject, hsize_b: int): int = "mac#"
-fun mylog(int): void = "mac#"
-fun my_rand(int): int = "mac#"
+
 
 // Player
 fun init_player(x: int, y: int): gameobject = "mac#"
@@ -104,14 +101,12 @@ fun player_can_fire(): Option(int) = "mac#"
 fun player_input(gameobject): void = "mac#"
 fun player_fire(gameobject): void = "mac#"
 fun player_create_bullet(p: gameobject): gameobject = "mac#"
-fun player_collisions(gameobject): int = "mac#"
 fun player_death(gameobject): void = "mac#"
 
 // Enemy
 fun init_enemies{x,y:pos}(s: store, cols: int(x), rows: int(y)): void = "mac#"
 fun enemies_get(): store = "mac#"
 fun enemy_create(x: int, y: int): gameobject = "mac#"
-fun enemy_collisions(): void = "mac#"
 fun enemy_update(dt: int): void = "mac#"
 fun enemy_can_fire(dt: int): Option(int) = "mac#"
 fun enemy_create_bullet(gameobject): gameobject = "mac#"
@@ -128,5 +123,8 @@ fun enemy_bullets_update(dt: int): void = "mac#"
 
 // Game
 fun game_tick(dt: int): void = "mac#"
-
 fun check_key(key: int): int = "mac#"
+fun my_rand(int): int = "mac#"
+
+fun gameover_alert(): void = "mac#"
+fun congrats_alert(): void = "mac#"
